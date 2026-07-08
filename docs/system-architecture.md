@@ -120,3 +120,17 @@ Role-based authorization controls access to administrative features.
 - RESTful API design
 - Type safety with TypeScript
 - Mobile-first responsive design
+
+## Repository Strategy
+
+OpsFlow will use a monorepo structure.
+
+The frontend, backend, and documentation will live inside one GitHub repository.
+
+### Structure
+
+```txt
+opsflow/
+├── frontend/
+├── backend/
+└── docs/
