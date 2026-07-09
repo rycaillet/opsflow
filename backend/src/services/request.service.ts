@@ -30,3 +30,12 @@ export async function getRequestsForUser(userId: string) {
     },
   });
 }
+
+export async function getRequestById(requestId: string, userId: string) {
+  return prisma.request.findFirst({
+    where: {
+      id: requestId,
+      requesterId: userId,
+    },
+  });
+}
