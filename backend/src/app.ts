@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import healthRoutes from "./routes/health.routes";
 import { env } from "./config/env";
+import authRoutes from "./routes/auth.routes";
 
 const app = express();
 
@@ -15,5 +16,6 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/health", healthRoutes);
+app.use("/api/auth", authRoutes);
 
 export default app;
