@@ -7,6 +7,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { MyRequestsPage } from "./pages/MyRequestsPage";
 import { NewRequestPage } from "./pages/NewRequestPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { RequestDetailPage } from "./pages/RequestDetailPage";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/requests/new" element={<NewRequestPage />} />
                 <Route path="/analytics" element={<AnalyticsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/requests/:id" element={<RequestDetailPage />} />
               </Routes>
             </AppShell>
           }
