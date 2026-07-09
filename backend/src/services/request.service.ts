@@ -39,3 +39,30 @@ export async function getRequestById(requestId: string, userId: string) {
     },
   });
 }
+
+export async function updateRequestStatus(
+  requestId: string,
+  userId: string,
+  status: "OPEN" | "IN_PROGRESS" | "WAITING" | "RESOLVED" | "CLOSED"
+) {
+  const existingRequest = await prisma.request.findFirst({
+    where: {
+      id: requestId,
+      requesterId: userId,
+    },
+  });
+
+  if (!existingRequest) {
+    return null;
+  }
+
+  return prisma.request.update({
+    where: {
+      id: requestId,
+    },
+    data: {
+      status,
+      resolvedAt: status === "RESOLVED" || status === "CLOSED" ? new Date() : null,
+    },
+  });
+}
