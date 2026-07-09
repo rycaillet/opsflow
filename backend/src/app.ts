@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import healthRoutes from "./routes/health.routes";
 import { env } from "./config/env";
 import authRoutes from "./routes/auth.routes";
+import requestRoutes from "./routes/request.routes";
 
 const app = express();
 
@@ -17,5 +18,6 @@ app.use(cookieParser());
 
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/requests", requestRoutes);
 
 export default app;
