@@ -27,7 +27,7 @@ function statusClass(status: OpsRequest["status"]) {
 function priorityClass(priority: OpsRequest["priority"]) {
   const classes = {
     LOW: "bg-slate-100 text-slate-700",
-    MEDIUM: "bg-blue-100 text-blue-700",
+    MEDIUM: "bg-amber-100 text-amber-700",
     HIGH: "bg-orange-100 text-orange-700",
     URGENT: "bg-red-100 text-red-700",
   };
