@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,4 +5,75 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum Role {
+  EMPLOYEE
+  STAFF
+  MANAGER
+  ADMIN
+}
+
+enum RequestStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(EMPLOYEE)
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  requests     Request[] @relation("RequesterRequests")
+  assigned     Request[] @relation("AssignedRequests")
+  comments     Comment[]
+}
+
+model Request {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  category    String
+  priority    Priority      @default(MEDIUM)
+  status      RequestStatus @default(OPEN)
+
+  requesterId String
+  assigneeId  String?
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  resolvedAt  DateTime?
+
+  requester   User          @relation("RequesterRequests", fields: [requesterId], references: [id])
+  assignee    User?         @relation("AssignedRequests", fields: [assigneeId], references: [id])
+  comments    Comment[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  body      String
+
+  requestId String
+  authorId  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  request   Request  @relation(fields: [requestId], references: [id])
+  author    User     @relation(fields: [authorId], references: [id])
 }
