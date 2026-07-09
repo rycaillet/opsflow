@@ -2,11 +2,12 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import healthRoutes from "./routes/health.routes";
+import { env } from "./config/env";
 
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: env.clientUrl,
   credentials: true,
 }));
 
