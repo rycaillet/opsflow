@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Calendar, Folder } from "lucide-react";
+import { Calendar, Folder, MessageSquare } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { Card } from "../components/ui/Card";
 import { apiRequest } from "../services/api";
+import type { Comment } from "../types/comment";
 import type { OpsRequest } from "../types/request";
 
 const statuses: OpsRequest["status"][] = [
@@ -35,12 +36,13 @@ export function RequestDetailPage() {
   const { id } = useParams();
 
   const [request, setRequest] = useState<OpsRequest | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    async function loadRequest() {
+    async function loadData() {
       try {
         const token = localStorage.getItem("opsflow_token");
 
@@ -49,11 +51,17 @@ export function RequestDetailPage() {
           return;
         }
 
-        const data = await apiRequest<OpsRequest>(`/requests/${id}`, {
+        const requestData = await apiRequest<OpsRequest>(`/requests/${id}`, {
           token,
         });
 
-        setRequest(data);
+        const commentData = await apiRequest<Comment[]>(
+          `/requests/${id}/comments`,
+          { token }
+        );
+
+        setRequest(requestData);
+        setComments(commentData);
       } catch {
         setError("Request not found.");
       } finally {
@@ -61,7 +69,7 @@ export function RequestDetailPage() {
       }
     }
 
-    loadRequest();
+    loadData();
   }, [id]);
 
   async function handleStatusChange(newStatus: OpsRequest["status"]) {
@@ -211,6 +219,47 @@ export function RequestDetailPage() {
                 </p>
               </div>
             </div>
+          )}
+        </div>
+      </Card>
+
+      <Card>
+        <div className="flex items-center gap-2">
+          <MessageSquare className="h-5 w-5 text-slate-500" />
+          <h2 className="text-lg font-semibold text-slate-900">Comments</h2>
+        </div>
+
+        <div className="mt-4 space-y-4">
+          {comments.map((comment) => (
+            <div
+              key={comment.id}
+              className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="font-medium text-slate-900">
+                    {comment.author.name}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {comment.author.role}
+                  </p>
+                </div>
+
+                <p className="text-xs text-slate-500">
+                  {formatDateTime(comment.createdAt)}
+                </p>
+              </div>
+
+              <p className="mt-3 text-sm leading-6 text-slate-700">
+                {comment.body}
+              </p>
+            </div>
+          ))}
+
+          {comments.length === 0 && (
+            <p className="text-sm text-slate-600">
+              No comments have been added yet.
+            </p>
           )}
         </div>
       </Card>
