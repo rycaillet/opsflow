@@ -21,6 +21,16 @@ function formatDate(date: string) {
   }).format(new Date(date));
 }
 
+function formatDateTime(date: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(date));
+}
+
 export function RequestDetailPage() {
   const { id } = useParams();
 
@@ -72,9 +82,7 @@ export function RequestDetailPage() {
         {
           method: "PATCH",
           token,
-          body: JSON.stringify({
-            status: newStatus,
-          }),
+          body: JSON.stringify({ status: newStatus }),
         }
       );
 
@@ -162,6 +170,48 @@ export function RequestDetailPage() {
               </p>
             </div>
           </div>
+        </div>
+      </Card>
+
+      <Card>
+        <h2 className="text-lg font-semibold text-slate-900">Timeline</h2>
+
+        <div className="mt-4 space-y-4">
+          <div className="flex gap-3">
+            <div className="mt-1 h-3 w-3 rounded-full bg-blue-600" />
+            <div>
+              <p className="font-medium text-slate-900">Request created</p>
+              <p className="text-sm text-slate-500">
+                {formatDateTime(request.createdAt)}
+              </p>
+            </div>
+          </div>
+
+          {request.updatedAt !== request.createdAt && (
+            <div className="flex gap-3">
+              <div className="mt-1 h-3 w-3 rounded-full bg-purple-600" />
+              <div>
+                <p className="font-medium text-slate-900">
+                  Status updated to {request.status.replace("_", " ")}
+                </p>
+                <p className="text-sm text-slate-500">
+                  {formatDateTime(request.updatedAt)}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {request.resolvedAt && (
+            <div className="flex gap-3">
+              <div className="mt-1 h-3 w-3 rounded-full bg-green-600" />
+              <div>
+                <p className="font-medium text-slate-900">Request resolved</p>
+                <p className="text-sm text-slate-500">
+                  {formatDateTime(request.resolvedAt)}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </Card>
     </div>
