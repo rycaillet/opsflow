@@ -6,8 +6,10 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MyRequestsPage } from "./pages/MyRequestsPage";
 import { NewRequestPage } from "./pages/NewRequestPage";
-import { SettingsPage } from "./pages/SettingsPage";
 import { RequestDetailPage } from "./pages/RequestDetailPage";
+import { SettingsPage } from "./pages/SettingsPage";
+import { ProtectedRoute } from "./routes/ProtectedRoute";
+import { PublicOnlyRoute } from "./routes/PublicOnlyRoute";
 
 function App() {
   return (
@@ -16,25 +18,44 @@ function App() {
         <Route
           path="/login"
           element={
-            <PublicLayout>
-              <LoginPage />
-            </PublicLayout>
+            <PublicOnlyRoute>
+              <PublicLayout>
+                <LoginPage />
+              </PublicLayout>
+            </PublicOnlyRoute>
           }
         />
 
         <Route
           path="/*"
           element={
-            <AppShell>
-              <Routes>
-                <Route path="/" element={<DashboardPage />} />
-                <Route path="/requests" element={<MyRequestsPage />} />
-                <Route path="/requests/new" element={<NewRequestPage />} />
-                <Route path="/analytics" element={<AnalyticsPage />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/requests/:id" element={<RequestDetailPage />} />
-              </Routes>
-            </AppShell>
+            <ProtectedRoute>
+              <AppShell>
+                <Routes>
+                  <Route path="/" element={<DashboardPage />} />
+                  <Route
+                    path="/requests"
+                    element={<MyRequestsPage />}
+                  />
+                  <Route
+                    path="/requests/new"
+                    element={<NewRequestPage />}
+                  />
+                  <Route
+                    path="/requests/:id"
+                    element={<RequestDetailPage />}
+                  />
+                  <Route
+                    path="/analytics"
+                    element={<AnalyticsPage />}
+                  />
+                  <Route
+                    path="/settings"
+                    element={<SettingsPage />}
+                  />
+                </Routes>
+              </AppShell>
+            </ProtectedRoute>
           }
         />
       </Routes>
