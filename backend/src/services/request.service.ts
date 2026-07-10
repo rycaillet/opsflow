@@ -42,13 +42,11 @@ export async function getRequestById(requestId: string, userId: string) {
 
 export async function updateRequestStatus(
   requestId: string,
-  userId: string,
   status: "OPEN" | "IN_PROGRESS" | "WAITING" | "RESOLVED" | "CLOSED"
 ) {
-  const existingRequest = await prisma.request.findFirst({
+  const existingRequest = await prisma.request.findUnique({
     where: {
       id: requestId,
-      requesterId: userId,
     },
   });
 
@@ -62,7 +60,10 @@ export async function updateRequestStatus(
     },
     data: {
       status,
-      resolvedAt: status === "RESOLVED" || status === "CLOSED" ? new Date() : null,
+      resolvedAt:
+        status === "RESOLVED" || status === "CLOSED"
+          ? new Date()
+          : null,
     },
   });
 }

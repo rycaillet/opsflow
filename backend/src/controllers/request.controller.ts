@@ -76,7 +76,10 @@ export async function updateRequestStatusHandler(
     return res.status(400).json({ message: "Invalid status." });
   }
 
-  const request = await updateRequestStatus(requestId, req.user.userId, status);
+  const request = await updateRequestStatus(
+    requestId,
+    status
+  );
 
   if (!request) {
     return res.status(404).json({ message: "Request not found." });
