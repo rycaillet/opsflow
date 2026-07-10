@@ -2,6 +2,7 @@ import { Response } from "express";
 import { AuthRequest } from "../middleware/auth.middleware";
 import {
   createRequest,
+  getAllRequests,
   getRequestById,
   getRequestsForUser,
   updateRequestStatus,
@@ -30,6 +31,21 @@ export async function getMyRequestsHandler(req: AuthRequest, res: Response) {
   return res.status(200).json(requests);
 }
 
+export async function getAllRequestsHandler(
+  req: AuthRequest,
+  res: Response
+) {
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Authentication required.",
+    });
+  }
+
+  const requests = await getAllRequests();
+
+  return res.status(200).json(requests);
+}
+
 export async function getRequestByIdHandler(req: AuthRequest, res: Response) {
   if (!req.user) {
     return res.status(401).json({ message: "Authentication required." });
@@ -43,7 +59,11 @@ if (!requestId) {
   return res.status(400).json({ message: "Request ID is required." });
 }
 
-const request = await getRequestById(requestId, req.user.userId);
+const request = await getRequestById(
+  requestId,
+  req.user.userId,
+  req.user.role
+);
 
   if (!request) {
     return res.status(404).json({ message: "Request not found." });

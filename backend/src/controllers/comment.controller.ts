@@ -20,7 +20,11 @@ export async function getCommentsHandler(req: AuthRequest, res: Response) {
     return res.status(400).json({ message: "Request ID is required." });
   }
 
-  const comments = await getCommentsForRequest(requestId, req.user.userId);
+  const comments = await getCommentsForRequest(
+    requestId,
+    req.user.userId,
+    req.user.role
+  );
 
   if (!comments) {
     return res.status(404).json({ message: "Request not found." });
@@ -40,13 +44,14 @@ export async function createCommentHandler(req: AuthRequest, res: Response) {
     return res.status(400).json({ message: "Request ID is required." });
   }
 
-  if (!req.body.body || typeof req.body.body !== "string") {
+  if (typeof req.body.body !== "string" ||!req.body.body.trim()) {
     return res.status(400).json({ message: "Comment body is required." });
   }
 
   const comment = await createComment({
     requestId,
     authorId: req.user.userId,
+    authorRole: req.user.role,
     body: req.body.body,
   });
 

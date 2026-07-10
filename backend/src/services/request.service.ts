@@ -1,3 +1,4 @@
+import { Role } from "@prisma/client";
 import { prisma } from "../config/prisma";
 
 type CreateRequestInput = {
@@ -31,11 +32,61 @@ export async function getRequestsForUser(userId: string) {
   });
 }
 
-export async function getRequestById(requestId: string, userId: string) {
+export async function getRequestById(
+  requestId: string,
+  userId: string,
+  role: Role
+) {
   return prisma.request.findFirst({
     where: {
       id: requestId,
-      requesterId: userId,
+      ...(role === Role.EMPLOYEE
+        ? {
+            requesterId: userId,
+          }
+        : {}),
+    },
+    include: {
+      requester: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      assignee: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+    },
+  });
+}
+
+export async function getAllRequests() {
+  return prisma.request.findMany({
+    include: {
+      requester: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      assignee: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
 }

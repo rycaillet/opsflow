@@ -1,17 +1,35 @@
+import { Role } from "@prisma/client";
 import { prisma } from "../config/prisma";
 
 type CreateCommentInput = {
   requestId: string;
   authorId: string;
+  authorRole: Role;
   body: string;
 };
 
-export async function getCommentsForRequest(requestId: string, userId: string) {
+function getRequestAccessWhere(
+  requestId: string,
+  userId: string,
+  role: Role
+) {
+  return {
+    id: requestId,
+    ...(role === Role.EMPLOYEE
+      ? {
+          requesterId: userId,
+        }
+      : {}),
+  };
+}
+
+export async function getCommentsForRequest(
+  requestId: string,
+  userId: string,
+  role: Role
+) {
   const request = await prisma.request.findFirst({
-    where: {
-      id: requestId,
-      requesterId: userId,
-    },
+    where: getRequestAccessWhere(requestId, userId, role),
   });
 
   if (!request) {
@@ -39,10 +57,11 @@ export async function getCommentsForRequest(requestId: string, userId: string) {
 
 export async function createComment(input: CreateCommentInput) {
   const request = await prisma.request.findFirst({
-    where: {
-      id: input.requestId,
-      requesterId: input.authorId,
-    },
+    where: getRequestAccessWhere(
+      input.requestId,
+      input.authorId,
+      input.authorRole
+    ),
   });
 
   if (!request) {
@@ -53,7 +72,7 @@ export async function createComment(input: CreateCommentInput) {
     data: {
       requestId: input.requestId,
       authorId: input.authorId,
-      body: input.body,
+      body: input.body.trim(),
     },
     include: {
       author: {
