@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Calendar, Folder, MessageSquare } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
+import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { apiRequest } from "../services/api";
 import type { Comment } from "../types/comment";
@@ -37,8 +38,10 @@ export function RequestDetailPage() {
 
   const [request, setRequest] = useState<OpsRequest | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isPostingComment, setIsPostingComment] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -102,6 +105,41 @@ export function RequestDetailPage() {
     }
   }
 
+  async function handleAddComment(event: React.FormEvent) {
+    event.preventDefault();
+
+    if (!request || !newComment.trim()) return;
+
+    try {
+      setIsPostingComment(true);
+
+      const token = localStorage.getItem("opsflow_token");
+
+      if (!token) {
+        setError("You must be logged in.");
+        return;
+      }
+
+      const createdComment = await apiRequest<Comment>(
+        `/requests/${request.id}/comments`,
+        {
+          method: "POST",
+          token,
+          body: JSON.stringify({
+            body: newComment,
+          }),
+        }
+      );
+
+      setComments((currentComments) => [...currentComments, createdComment]);
+      setNewComment("");
+    } catch {
+      setError("Unable to add comment.");
+    } finally {
+      setIsPostingComment(false);
+    }
+  }
+
   if (isLoading) {
     return <p className="text-slate-600">Loading request...</p>;
   }
@@ -129,7 +167,6 @@ export function RequestDetailPage() {
             <h1 className="text-3xl font-bold text-slate-900">
               {request.title}
             </h1>
-
             <p className="mt-2 text-slate-600">{request.description}</p>
           </div>
 
@@ -262,6 +299,25 @@ export function RequestDetailPage() {
             </p>
           )}
         </div>
+
+        <form onSubmit={handleAddComment} className="mt-6 space-y-3">
+          <label className="block space-y-2">
+            <span className="text-sm font-medium text-slate-700">
+              Add comment
+            </span>
+
+            <textarea
+              className="min-h-28 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              value={newComment}
+              onChange={(event) => setNewComment(event.target.value)}
+              placeholder="Add an update or note about this request..."
+            />
+          </label>
+
+          <Button type="submit" disabled={isPostingComment || !newComment.trim()}>
+            {isPostingComment ? "Posting..." : "Post Comment"}
+          </Button>
+        </form>
       </Card>
     </div>
   );
