@@ -4,6 +4,20 @@ type RequestOptions = RequestInit & {
   token?: string;
 };
 
+type ApiErrorResponse = {
+  message?: string;
+};
+
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 export async function apiRequest<T>(
   endpoint: string,
   options: RequestOptions = {}
@@ -20,8 +34,20 @@ export async function apiRequest<T>(
   });
 
   if (!response.ok) {
-    throw new Error("API request failed");
+    let message = "API request failed.";
+
+    try {
+      const errorData = (await response.json()) as ApiErrorResponse;
+
+      if (errorData.message) {
+        message = errorData.message;
+      }
+    } catch {
+      // Keep the fallback message if the server did not return JSON.
+    }
+
+    throw new ApiError(message, response.status);
   }
 
-  return response.json();
+  return response.json() as Promise<T>;
 }
