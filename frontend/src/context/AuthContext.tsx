@@ -1,5 +1,6 @@
 import {
   createContext,
+  useEffect,
   useState,
   type ReactNode,
 } from "react";
@@ -7,6 +8,7 @@ import { apiRequest } from "../services/api";
 import type {
   AuthResponse,
   AuthUser,
+  CurrentUserResponse,
   LoginCredentials,
   RegisterCredentials,
 } from "../types/auth";
@@ -17,6 +19,7 @@ type AuthContextValue = {
   user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (credentials: LoginCredentials) => Promise<AuthUser>;
   register: (
     credentials: RegisterCredentials
@@ -39,6 +42,55 @@ export function AuthProvider({
   const [token, setToken] = useState<string | null>(() =>
     localStorage.getItem(TOKEN_STORAGE_KEY)
   );
+
+  const [isLoading, setIsLoading] = useState(
+    Boolean(token)
+  );
+
+  useEffect(() => {
+    if (!token) {
+      setUser(null);
+      setIsLoading(false);
+      return;
+    }
+
+    let isActive = true;
+
+    async function restoreSession() {
+      setIsLoading(true);
+
+      try {
+        const result =
+          await apiRequest<CurrentUserResponse>(
+            "/auth/me",
+            {
+              token: token!,
+            }
+          );
+
+        if (isActive) {
+          setUser(result.user);
+        }
+      } catch {
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
+
+        if (isActive) {
+          setToken(null);
+          setUser(null);
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    restoreSession();
+
+    return () => {
+      isActive = false;
+    };
+  }, [token]);
 
   async function login(
     credentials: LoginCredentials
@@ -89,7 +141,8 @@ export function AuthProvider({
       value={{
         user,
         token,
-        isAuthenticated: Boolean(token),
+        isAuthenticated: Boolean(token && user),
+        isLoading,
         login,
         register,
         logout,
