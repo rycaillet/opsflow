@@ -1,46 +1,40 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
-import { apiRequest } from "../services/api";
-
-type LoginResponse = {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
-  token: string;
-};
+import { useAuth } from "../hooks/useAuth";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("ryan@example.com");
   const [password, setPassword] = useState("Password123!");
   const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    setMessage("");
+    setIsSubmitting(true);
+
     try {
-      const result = await apiRequest<LoginResponse>("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+      await login({
+        email,
+        password,
       });
 
-      localStorage.setItem("opsflow_token", result.token);
-
-      setMessage(`Logged in as ${result.user.name}`);
-
       navigate("/");
-    } catch {
-      setMessage("Login failed.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Login failed."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -60,6 +54,8 @@ export function LoginPage() {
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
+          disabled={isSubmitting}
+          required
         />
 
         <Input
@@ -67,15 +63,24 @@ export function LoginPage() {
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
+          disabled={isSubmitting}
+          required
         />
 
-        <Button type="submit" className="w-full">
-          Sign in
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Signing in..." : "Sign in"}
         </Button>
       </form>
 
       {message && (
-        <p className="mt-4 text-sm font-medium text-slate-700">
+        <p
+          role="alert"
+          className="mt-4 text-sm font-medium text-red-600"
+        >
           {message}
         </p>
       )}
