@@ -1,6 +1,7 @@
 import { Role } from "@prisma/client";
 import { Router } from "express";
 import {
+  assignRequestToSelfHandler,
   createRequestHandler,
   getAllRequestsHandler,
   getMyRequestsHandler,
@@ -29,6 +30,13 @@ router.patch(
   requireAuth,
   requireRole(Role.STAFF, Role.MANAGER, Role.ADMIN),
   updateRequestStatusHandler
+);
+
+router.patch(
+  "/:id/assign-self",
+  requireAuth,
+  requireRole(Role.STAFF, Role.MANAGER, Role.ADMIN),
+  assignRequestToSelfHandler
 );
 
 export default router;

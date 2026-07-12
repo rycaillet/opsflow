@@ -118,3 +118,44 @@ export async function updateRequestStatus(
     },
   });
 }
+
+export async function assignRequestToUser(
+  requestId: string,
+  assigneeId: string
+) {
+  const existingRequest = await prisma.request.findUnique({
+    where: {
+      id: requestId,
+    },
+  });
+
+  if (!existingRequest) {
+    return null;
+  }
+
+  return prisma.request.update({
+    where: {
+      id: requestId,
+    },
+    data: {
+      assigneeId,
+    },
+    include: {
+      requester: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      assignee: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+    },
+  });
+}
