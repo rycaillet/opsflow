@@ -64,6 +64,7 @@ export function RequestDetailPage() {
   const [newComment, setNewComment] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
   const [isPostingComment, setIsPostingComment] = useState(false);
   const [error, setError] = useState("");
 
@@ -71,6 +72,9 @@ export function RequestDetailPage() {
     user?.role === "STAFF" ||
     user?.role === "MANAGER" ||
     user?.role === "ADMIN";
+
+  const isAssignedToCurrentUser =
+    request?.assigneeId === user?.id;
 
   useEffect(() => {
     async function loadData() {
@@ -154,6 +158,35 @@ export function RequestDetailPage() {
     }
   }
 
+  async function handleAssignToSelf() {
+    if (!request || !token || !canManageRequest) {
+      return;
+    }
+
+    try {
+      setIsAssigning(true);
+      setError("");
+
+      const updatedRequest = await apiRequest<OpsRequest>(
+        `/requests/${request.id}/assign-self`,
+        {
+          method: "PATCH",
+          token,
+        }
+      );
+
+      setRequest(updatedRequest);
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Unable to assign request."
+      );
+    } finally {
+      setIsAssigning(false);
+    }
+  }
+
   async function handleAddComment(
     event: FormEvent<HTMLFormElement>
   ) {
@@ -198,11 +231,7 @@ export function RequestDetailPage() {
   }
 
   if (isLoading) {
-    return (
-      <p className="text-slate-600">
-        Loading request...
-      </p>
-    );
+    return <p className="text-slate-600">Loading request...</p>;
   }
 
   if (error && !request) {
@@ -264,23 +293,41 @@ export function RequestDetailPage() {
           </div>
 
           {canManageRequest && request.requester && (
-            <div className="flex flex-col gap-3 rounded-lg bg-slate-50 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
-              <div className="inline-flex items-center gap-2 text-slate-600">
-                <UserRound className="h-4 w-4 shrink-0" />
+            <div className="rounded-lg bg-slate-50 p-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="inline-flex items-center gap-2 text-sm text-slate-600">
+                  <UserRound className="h-4 w-4 shrink-0" />
 
-                <span>
-                  Requested by{" "}
-                  <span className="font-medium text-slate-900">
-                    {request.requester.name}
+                  <span>
+                    Requested by{" "}
+                    <span className="font-medium text-slate-900">
+                      {request.requester.name}
+                    </span>
                   </span>
-                </span>
-              </div>
+                </div>
 
-              <p className="text-slate-600">
-                {request.assignee
-                  ? `Assigned to ${request.assignee.name}`
-                  : "Currently unassigned"}
-              </p>
+                <div className="flex flex-col items-start gap-2 sm:items-end">
+                  <p className="text-sm text-slate-600">
+                    {isAssignedToCurrentUser
+                      ? "Assigned to you"
+                      : request.assignee
+                        ? `Assigned to ${request.assignee.name}`
+                        : "Currently unassigned"}
+                  </p>
+
+                  {!request.assignee && (
+                    <Button
+                      type="button"
+                      onClick={handleAssignToSelf}
+                      disabled={isAssigning}
+                    >
+                      {isAssigning
+                        ? "Assigning..."
+                        : "Assign to Me"}
+                    </Button>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
@@ -362,8 +409,7 @@ export function RequestDetailPage() {
 
               <div>
                 <p className="font-medium text-slate-900">
-                  Status updated to{" "}
-                  {formatStatus(request.status)}
+                  Status updated to {formatStatus(request.status)}
                 </p>
 
                 <p className="text-sm text-slate-500">
