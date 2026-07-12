@@ -1,8 +1,14 @@
-import { useEffect, useState } from "react";
-import { Calendar, Folder, MessageSquare } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
+import {
+  Calendar,
+  Folder,
+  MessageSquare,
+  UserRound,
+} from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
+import { useAuth } from "../hooks/useAuth";
 import { apiRequest } from "../services/api";
 import type { Comment } from "../types/comment";
 import type { OpsRequest } from "../types/request";
@@ -33,8 +39,25 @@ function formatDateTime(date: string) {
   }).format(new Date(date));
 }
 
+function formatStatus(status: OpsRequest["status"]) {
+  return status
+    .toLowerCase()
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function formatRole(role: string) {
+  return role
+    .toLowerCase()
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export function RequestDetailPage() {
   const { id } = useParams();
+  const { user, token } = useAuth();
 
   const [request, setRequest] = useState<OpsRequest | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -44,81 +67,107 @@ export function RequestDetailPage() {
   const [isPostingComment, setIsPostingComment] = useState(false);
   const [error, setError] = useState("");
 
+  const canManageRequest =
+    user?.role === "STAFF" ||
+    user?.role === "MANAGER" ||
+    user?.role === "ADMIN";
+
   useEffect(() => {
     async function loadData() {
+      if (!token || !id) {
+        setError("Unable to load request.");
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        const token = localStorage.getItem("opsflow_token");
+        setError("");
 
-        if (!token || !id) {
-          setError("Unable to load request.");
-          return;
-        }
-
-        const requestData = await apiRequest<OpsRequest>(`/requests/${id}`, {
-          token,
-        });
+        const requestData = await apiRequest<OpsRequest>(
+          `/requests/${id}`,
+          {
+            token,
+          }
+        );
 
         const commentData = await apiRequest<Comment[]>(
           `/requests/${id}/comments`,
-          { token }
+          {
+            token,
+          }
         );
 
         setRequest(requestData);
         setComments(commentData);
-      } catch {
-        setError("Request not found.");
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Request not found."
+        );
       } finally {
         setIsLoading(false);
       }
     }
 
     loadData();
-  }, [id]);
+  }, [id, token]);
 
-  async function handleStatusChange(newStatus: OpsRequest["status"]) {
-    if (!request) return;
+  async function handleStatusChange(
+    newStatus: OpsRequest["status"]
+  ) {
+    if (!request || !token || !canManageRequest) {
+      return;
+    }
 
     try {
       setIsUpdating(true);
-
-      const token = localStorage.getItem("opsflow_token");
-
-      if (!token) {
-        setError("You must be logged in.");
-        return;
-      }
+      setError("");
 
       const updatedRequest = await apiRequest<OpsRequest>(
         `/requests/${request.id}/status`,
         {
           method: "PATCH",
           token,
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({
+            status: newStatus,
+          }),
         }
       );
 
-      setRequest(updatedRequest);
-    } catch {
-      setError("Unable to update request status.");
+      setRequest((currentRequest) =>
+        currentRequest
+          ? {
+              ...currentRequest,
+              ...updatedRequest,
+            }
+          : updatedRequest
+      );
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Unable to update request status."
+      );
     } finally {
       setIsUpdating(false);
     }
   }
 
-  async function handleAddComment(event: React.FormEvent) {
+  async function handleAddComment(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
-    if (!request || !newComment.trim()) return;
+    const trimmedComment = newComment.trim();
+
+    if (!request || !token || !trimmedComment) {
+      return;
+    }
 
     try {
       setIsPostingComment(true);
-
-      const token = localStorage.getItem("opsflow_token");
-
-      if (!token) {
-        setError("You must be logged in.");
-        return;
-      }
+      setError("");
 
       const createdComment = await apiRequest<Comment>(
         `/requests/${request.id}/comments`,
@@ -126,26 +175,44 @@ export function RequestDetailPage() {
           method: "POST",
           token,
           body: JSON.stringify({
-            body: newComment,
+            body: trimmedComment,
           }),
         }
       );
 
-      setComments((currentComments) => [...currentComments, createdComment]);
+      setComments((currentComments) => [
+        ...currentComments,
+        createdComment,
+      ]);
+
       setNewComment("");
-    } catch {
-      setError("Unable to add comment.");
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Unable to add comment."
+      );
     } finally {
       setIsPostingComment(false);
     }
   }
 
   if (isLoading) {
-    return <p className="text-slate-600">Loading request...</p>;
+    return (
+      <p className="text-slate-600">
+        Loading request...
+      </p>
+    );
   }
 
-  if (error) {
-    return <p className="text-red-600">{error}</p>;
+  if (error && !request) {
+    return (
+      <Card>
+        <p className="text-sm font-medium text-red-600">
+          {error}
+        </p>
+      </Card>
+    );
   }
 
   if (!request) {
@@ -161,13 +228,27 @@ export function RequestDetailPage() {
         ← Back to requests
       </Link>
 
+      {error && (
+        <Card>
+          <p
+            role="alert"
+            className="text-sm font-medium text-red-600"
+          >
+            {error}
+          </p>
+        </Card>
+      )}
+
       <Card>
         <div className="space-y-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-900">
               {request.title}
             </h1>
-            <p className="mt-2 text-slate-600">{request.description}</p>
+
+            <p className="mt-2 leading-7 text-slate-600">
+              {request.description}
+            </p>
           </div>
 
           <div className="flex flex-wrap gap-3 text-sm text-slate-500">
@@ -182,34 +263,71 @@ export function RequestDetailPage() {
             </span>
           </div>
 
+          {canManageRequest && request.requester && (
+            <div className="flex flex-col gap-3 rounded-lg bg-slate-50 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+              <div className="inline-flex items-center gap-2 text-slate-600">
+                <UserRound className="h-4 w-4 shrink-0" />
+
+                <span>
+                  Requested by{" "}
+                  <span className="font-medium text-slate-900">
+                    {request.requester.name}
+                  </span>
+                </span>
+              </div>
+
+              <p className="text-slate-600">
+                {request.assignee
+                  ? `Assigned to ${request.assignee.name}`
+                  : "Currently unassigned"}
+              </p>
+            </div>
+          )}
+
           <div className="grid gap-4 border-t border-slate-200 pt-4 md:grid-cols-2">
-            <label className="block space-y-2">
-              <span className="text-sm font-medium text-slate-500">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-slate-500">
                 Status
-              </span>
+              </p>
 
-              <select
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:opacity-60"
-                value={request.status}
-                onChange={(event) =>
-                  handleStatusChange(event.target.value as OpsRequest["status"])
-                }
-                disabled={isUpdating}
-              >
-                {statuses.map((status) => (
-                  <option key={status} value={status}>
-                    {status.replace("_", " ")}
-                  </option>
-                ))}
-              </select>
+              {canManageRequest ? (
+                <>
+                  <select
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    value={request.status}
+                    onChange={(event) =>
+                      handleStatusChange(
+                        event.target
+                          .value as OpsRequest["status"]
+                      )
+                    }
+                    disabled={isUpdating}
+                  >
+                    {statuses.map((status) => (
+                      <option key={status} value={status}>
+                        {formatStatus(status)}
+                      </option>
+                    ))}
+                  </select>
 
-              {isUpdating && (
-                <p className="text-xs text-slate-500">Updating status...</p>
+                  {isUpdating && (
+                    <p className="text-xs text-slate-500">
+                      Updating status...
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="font-semibold text-slate-900">
+                  {formatStatus(request.status)}
+                </p>
               )}
-            </label>
+            </div>
 
             <div>
-              <p className="text-sm font-medium text-slate-500">Priority</p>
+              <p className="text-sm font-medium text-slate-500">
+                Priority
+              </p>
+
               <p className="mt-1 font-semibold text-slate-900">
                 {request.priority}
               </p>
@@ -219,13 +337,19 @@ export function RequestDetailPage() {
       </Card>
 
       <Card>
-        <h2 className="text-lg font-semibold text-slate-900">Timeline</h2>
+        <h2 className="text-lg font-semibold text-slate-900">
+          Timeline
+        </h2>
 
         <div className="mt-4 space-y-4">
           <div className="flex gap-3">
-            <div className="mt-1 h-3 w-3 rounded-full bg-blue-600" />
+            <div className="mt-1 h-3 w-3 shrink-0 rounded-full bg-blue-600" />
+
             <div>
-              <p className="font-medium text-slate-900">Request created</p>
+              <p className="font-medium text-slate-900">
+                Request created
+              </p>
+
               <p className="text-sm text-slate-500">
                 {formatDateTime(request.createdAt)}
               </p>
@@ -234,11 +358,14 @@ export function RequestDetailPage() {
 
           {request.updatedAt !== request.createdAt && (
             <div className="flex gap-3">
-              <div className="mt-1 h-3 w-3 rounded-full bg-purple-600" />
+              <div className="mt-1 h-3 w-3 shrink-0 rounded-full bg-purple-600" />
+
               <div>
                 <p className="font-medium text-slate-900">
-                  Status updated to {request.status.replace("_", " ")}
+                  Status updated to{" "}
+                  {formatStatus(request.status)}
                 </p>
+
                 <p className="text-sm text-slate-500">
                   {formatDateTime(request.updatedAt)}
                 </p>
@@ -248,9 +375,13 @@ export function RequestDetailPage() {
 
           {request.resolvedAt && (
             <div className="flex gap-3">
-              <div className="mt-1 h-3 w-3 rounded-full bg-green-600" />
+              <div className="mt-1 h-3 w-3 shrink-0 rounded-full bg-green-600" />
+
               <div>
-                <p className="font-medium text-slate-900">Request resolved</p>
+                <p className="font-medium text-slate-900">
+                  Request resolved
+                </p>
+
                 <p className="text-sm text-slate-500">
                   {formatDateTime(request.resolvedAt)}
                 </p>
@@ -263,7 +394,10 @@ export function RequestDetailPage() {
       <Card>
         <div className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5 text-slate-500" />
-          <h2 className="text-lg font-semibold text-slate-900">Comments</h2>
+
+          <h2 className="text-lg font-semibold text-slate-900">
+            Comments
+          </h2>
         </div>
 
         <div className="mt-4 space-y-4">
@@ -272,13 +406,14 @@ export function RequestDetailPage() {
               key={comment.id}
               className="rounded-lg border border-slate-200 bg-slate-50 p-4"
             >
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="font-medium text-slate-900">
                     {comment.author.name}
                   </p>
+
                   <p className="text-xs text-slate-500">
-                    {comment.author.role}
+                    {formatRole(comment.author.role)}
                   </p>
                 </div>
 
@@ -287,7 +422,7 @@ export function RequestDetailPage() {
                 </p>
               </div>
 
-              <p className="mt-3 text-sm leading-6 text-slate-700">
+              <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
                 {comment.body}
               </p>
             </div>
@@ -300,22 +435,35 @@ export function RequestDetailPage() {
           )}
         </div>
 
-        <form onSubmit={handleAddComment} className="mt-6 space-y-3">
+        <form
+          onSubmit={handleAddComment}
+          className="mt-6 space-y-3"
+        >
           <label className="block space-y-2">
             <span className="text-sm font-medium text-slate-700">
               Add comment
             </span>
 
             <textarea
-              className="min-h-28 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="min-h-28 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
               value={newComment}
-              onChange={(event) => setNewComment(event.target.value)}
+              onChange={(event) =>
+                setNewComment(event.target.value)
+              }
               placeholder="Add an update or note about this request..."
+              disabled={isPostingComment}
             />
           </label>
 
-          <Button type="submit" disabled={isPostingComment || !newComment.trim()}>
-            {isPostingComment ? "Posting..." : "Post Comment"}
+          <Button
+            type="submit"
+            disabled={
+              isPostingComment || !newComment.trim()
+            }
+          >
+            {isPostingComment
+              ? "Posting..."
+              : "Post Comment"}
           </Button>
         </form>
       </Card>
