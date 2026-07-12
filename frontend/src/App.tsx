@@ -10,6 +10,7 @@ import { RequestDetailPage } from "./pages/RequestDetailPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { PublicOnlyRoute } from "./routes/PublicOnlyRoute";
+import { RoleRoute } from "./routes/RoleRoute";
 
 function App() {
   return (
@@ -47,7 +48,11 @@ function App() {
                   />
                   <Route
                     path="/analytics"
-                    element={<AnalyticsPage />}
+                    element={
+                      <RoleRoute allowedRoles={["MANAGER", "ADMIN"]}>
+                        <AnalyticsPage />
+                      </RoleRoute>
+                    }
                   />
                   <Route
                     path="/settings"
