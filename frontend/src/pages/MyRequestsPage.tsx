@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { Calendar, Folder, Search } from "lucide-react";
+import {
+  Calendar,
+  Folder,
+  Search,
+  UserRound,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card } from "../components/ui/Card";
+import { useAuth } from "../hooks/useAuth";
 import { apiRequest } from "../services/api";
 import type { OpsRequest } from "../types/request";
 
@@ -32,64 +38,132 @@ function priorityClass(priority: OpsRequest["priority"]) {
   }[priority];
 }
 
+function formatStatus(status: OpsRequest["status"]) {
+  return status
+    .toLowerCase()
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export function MyRequestsPage() {
+  const { user, token } = useAuth();
+
   const [requests, setRequests] = useState<OpsRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [priorityFilter, setPriorityFilter] = useState("ALL");
 
+  const isEmployee = user?.role === "EMPLOYEE";
+
   useEffect(() => {
     async function loadRequests() {
-      const token = localStorage.getItem("opsflow_token");
-
-      if (!token) {
+      if (!token || !user) {
         setIsLoading(false);
         return;
       }
 
-      const data = await apiRequest<OpsRequest[]>("/requests/mine", {
-        token,
-      });
+      try {
+        setError("");
 
-      setRequests(data);
-      setIsLoading(false);
+        const endpoint =
+          user.role === "EMPLOYEE"
+            ? "/requests/mine"
+            : "/requests";
+
+        const data = await apiRequest<OpsRequest[]>(
+          endpoint,
+          {
+            token,
+          }
+        );
+
+        setRequests(data);
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Unable to load requests."
+        );
+      } finally {
+        setIsLoading(false);
+      }
     }
 
     loadRequests();
-  }, []);
+  }, [token, user]);
 
   const filteredRequests = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+
     return requests.filter((request) => {
+      const searchableText = [
+        request.title,
+        request.description,
+        request.category,
+        request.requester?.name ?? "",
+        request.requester?.email ?? "",
+      ]
+        .join(" ")
+        .toLowerCase();
+
       const matchesSearch =
-        request.title.toLowerCase().includes(search.toLowerCase()) ||
-        request.description.toLowerCase().includes(search.toLowerCase()) ||
-        request.category.toLowerCase().includes(search.toLowerCase());
+        !normalizedSearch ||
+        searchableText.includes(normalizedSearch);
 
       const matchesStatus =
-        statusFilter === "ALL" || request.status === statusFilter;
+        statusFilter === "ALL" ||
+        request.status === statusFilter;
 
       const matchesPriority =
-        priorityFilter === "ALL" || request.priority === priorityFilter;
+        priorityFilter === "ALL" ||
+        request.priority === priorityFilter;
 
-      return matchesSearch && matchesStatus && matchesPriority;
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesPriority
+      );
     });
-  }, [requests, search, statusFilter, priorityFilter]);
+  }, [
+    requests,
+    search,
+    statusFilter,
+    priorityFilter,
+  ]);
 
   if (isLoading) {
-    return <p className="text-slate-600">Loading requests...</p>;
+    return (
+      <p className="text-slate-600">
+        Loading requests...
+      </p>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <p className="text-sm font-medium text-red-600">
+          {error}
+        </p>
+      </Card>
+    );
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-slate-900">
-          My Requests
+          {isEmployee ? "My Requests" : "Request Queue"}
         </h1>
 
         <p className="mt-2 text-slate-600">
-          View and track the requests you have submitted.
+          {isEmployee
+            ? "View and track the requests you have submitted."
+            : "Review and manage incoming workplace requests."}
         </p>
       </div>
 
@@ -99,9 +173,15 @@ export function MyRequestsPage() {
 
           <input
             className="w-full rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            placeholder="Search requests..."
+            placeholder={
+              isEmployee
+                ? "Search your requests..."
+                : "Search requests or employees..."
+            }
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) =>
+              setSearch(event.target.value)
+            }
           />
         </div>
 
@@ -109,11 +189,15 @@ export function MyRequestsPage() {
           <select
             className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
+            onChange={(event) =>
+              setStatusFilter(event.target.value)
+            }
           >
             <option value="ALL">All statuses</option>
             <option value="OPEN">Open</option>
-            <option value="IN_PROGRESS">In Progress</option>
+            <option value="IN_PROGRESS">
+              In Progress
+            </option>
             <option value="WAITING">Waiting</option>
             <option value="RESOLVED">Resolved</option>
             <option value="CLOSED">Closed</option>
@@ -135,6 +219,11 @@ export function MyRequestsPage() {
         </div>
       </Card>
 
+      <p className="text-sm text-slate-500">
+        Showing {filteredRequests.length} of{" "}
+        {requests.length} requests
+      </p>
+
       <div className="space-y-4">
         {filteredRequests.map((request) => (
           <Link
@@ -143,8 +232,8 @@ export function MyRequestsPage() {
             className="block"
           >
             <Card className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
-              <div className="flex items-start justify-between gap-6">
-                <div className="space-y-3">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0 space-y-3">
                   <div>
                     <h2 className="text-lg font-semibold text-slate-900">
                       {request.title}
@@ -163,18 +252,35 @@ export function MyRequestsPage() {
 
                     <span className="inline-flex items-center gap-1.5">
                       <Calendar className="h-4 w-4" />
-                      Opened {formatDate(request.createdAt)}
+                      Opened{" "}
+                      {formatDate(request.createdAt)}
                     </span>
+
+                    {!isEmployee &&
+                      request.requester && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <UserRound className="h-4 w-4" />
+                          {request.requester.name}
+                        </span>
+                      )}
                   </div>
+
+                  {!isEmployee && (
+                    <p className="text-xs text-slate-500">
+                      {request.assignee
+                        ? `Assigned to ${request.assignee.name}`
+                        : "Unassigned"}
+                    </p>
+                  )}
                 </div>
 
-                <div className="flex shrink-0 flex-col items-end gap-3">
+                <div className="flex shrink-0 flex-row gap-3 sm:flex-col sm:items-end">
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass(
                       request.status
                     )}`}
                   >
-                    {request.status.replace("_", " ")}
+                    {formatStatus(request.status)}
                   </span>
 
                   <span

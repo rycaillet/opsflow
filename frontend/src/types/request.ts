@@ -1,3 +1,10 @@
+export type RequestUser = {
+  id: string;
+  name: string;
+  email: string;
+  role?: "EMPLOYEE" | "STAFF" | "MANAGER" | "ADMIN";
+};
+
 export type OpsRequest = {
   id: string;
   title: string;
@@ -10,4 +17,6 @@ export type OpsRequest = {
   createdAt: string;
   updatedAt: string;
   resolvedAt: string | null;
+  requester?: RequestUser;
+  assignee?: RequestUser | null;
 };

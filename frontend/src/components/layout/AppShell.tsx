@@ -17,12 +17,59 @@ type AppShellProps = {
   children: React.ReactNode;
 };
 
-const navItems = [
+const employeeNavItems = [
   { label: "Dashboard", to: "/", icon: Home, end: true },
-  { label: "My Requests", to: "/requests", icon: Inbox, end: true },
-  { label: "New Request", to: "/requests/new", icon: PlusCircle },
-  { label: "Analytics", to: "/analytics", icon: BarChart3 },
-  { label: "Settings", to: "/settings", icon: Settings },
+  {
+    label: "My Requests",
+    to: "/requests",
+    icon: Inbox,
+    end: true,
+  },
+  {
+    label: "New Request",
+    to: "/requests/new",
+    icon: PlusCircle,
+  },
+  {
+    label: "Settings",
+    to: "/settings",
+    icon: Settings,
+  },
+];
+
+const staffNavItems = [
+  { label: "Dashboard", to: "/", icon: Home, end: true },
+  {
+    label: "Request Queue",
+    to: "/requests",
+    icon: Inbox,
+    end: true,
+  },
+  {
+    label: "Settings",
+    to: "/settings",
+    icon: Settings,
+  },
+];
+
+const managerNavItems = [
+  { label: "Dashboard", to: "/", icon: Home, end: true },
+  {
+    label: "Request Queue",
+    to: "/requests",
+    icon: Inbox,
+    end: true,
+  },
+  {
+    label: "Analytics",
+    to: "/analytics",
+    icon: BarChart3,
+  },
+  {
+    label: "Settings",
+    to: "/settings",
+    icon: Settings,
+  },
 ];
 
 function navClass(isActive: boolean) {
@@ -44,6 +91,13 @@ function formatRole(role: string) {
 export function AppShell({ children }: AppShellProps) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  const navItems =
+    user?.role === "EMPLOYEE"
+      ? employeeNavItems
+      : user?.role === "STAFF"
+        ? staffNavItems
+        : managerNavItems;
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
@@ -78,6 +132,7 @@ export function AppShell({ children }: AppShellProps) {
       <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-slate-200 bg-white md:flex md:flex-col">
         <div className="border-b border-slate-200 px-6 py-6">
           <h1 className="text-3xl font-bold text-slate-900">OpsFlow</h1>
+
           <p className="mt-1 text-sm text-slate-500">
             Operations Workspace
           </p>
@@ -161,11 +216,7 @@ export function AppShell({ children }: AppShellProps) {
                   setIsMobileMenuOpen((isOpen) => !isOpen)
                 }
               >
-                {isMobileMenuOpen ? (
-                  <X size={18} />
-                ) : (
-                  <Menu size={18} />
-                )}
+                {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
                 Menu
               </button>
 
