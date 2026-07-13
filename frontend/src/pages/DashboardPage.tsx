@@ -12,6 +12,9 @@ import { StatusBadge } from "../components/ui/StatusBadge";
 import { useAuth } from "../hooks/useAuth";
 import { apiRequest } from "../services/api";
 import type { OpsRequest } from "../types/request";
+import { EmptyState } from "../components/ui/EmptyState";
+import { ErrorState } from "../components/ui/ErrorState";
+import { LoadingState } from "../components/ui/LoadingState";
 
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -143,19 +146,16 @@ export function DashboardPage() {
 
   if (isLoading) {
     return (
-      <p className="text-slate-600">
-        Loading dashboard...
-      </p>
+      <LoadingState message="Loading dashboard..." />
     );
   }
 
   if (error) {
     return (
-      <Card>
-        <p className="text-sm font-medium text-red-600">
-          {error}
-        </p>
-      </Card>
+      <ErrorState
+        title="Unable to load dashboard"
+        message={error}
+      />
     );
   }
 
@@ -299,6 +299,19 @@ export function DashboardPage() {
               No requests are available yet.
             </p>
           )}
+
+        {recentRequests.length === 0 && (
+          <div className="py-4">
+            <EmptyState
+              title="No requests yet"
+              message={
+                isEmployee
+                  ? "Create your first request to begin tracking its progress."
+                  : "New workplace requests will appear here when they are submitted."
+              }
+            />
+          </div>
+        )}
         </div>
       </Card>
     </div>

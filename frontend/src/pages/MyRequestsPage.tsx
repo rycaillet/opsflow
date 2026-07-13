@@ -12,6 +12,9 @@ import { StatusBadge } from "../components/ui/StatusBadge";
 import { useAuth } from "../hooks/useAuth";
 import { apiRequest } from "../services/api";
 import type { OpsRequest } from "../types/request";
+import { EmptyState } from "../components/ui/EmptyState";
+import { ErrorState } from "../components/ui/ErrorState";
+import { LoadingState } from "../components/ui/LoadingState";
 
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -112,19 +115,16 @@ export function MyRequestsPage() {
 
   if (isLoading) {
     return (
-      <p className="text-slate-600">
-        Loading requests...
-      </p>
+      <LoadingState message="Loading requests..." />
     );
   }
 
   if (error) {
     return (
-      <Card>
-        <p className="text-sm font-medium text-red-600">
-          {error}
-        </p>
-      </Card>
+      <ErrorState
+        title="Unable to load requests"
+        message={error}
+      />
     );
   }
 
@@ -257,11 +257,22 @@ export function MyRequestsPage() {
         ))}
 
         {filteredRequests.length === 0 && (
-          <Card>
-            <p className="text-sm text-slate-600">
-              No requests match your search or filters.
-            </p>
-          </Card>
+          <EmptyState
+            title={
+              requests.length === 0
+                ? isEmployee
+                  ? "No requests submitted"
+                  : "The request queue is empty"
+                : "No matching requests"
+            }
+            message={
+              requests.length === 0
+                ? isEmployee
+                  ? "Your submitted workplace requests will appear here."
+                  : "New requests will appear here when employees submit them."
+                : "Try changing your search text or clearing one of the filters."
+            }
+          />
         )}
       </div>
     </div>
