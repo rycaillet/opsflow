@@ -4,10 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
+import { PageHeader } from "../components/ui/PageHeader";
+import { PasswordInput } from "../components/ui/PasswordInput";
 import { useAuth } from "../hooks/useAuth";
 import { apiRequest } from "../services/api";
 import type { AuthUser } from "../types/auth";
-import { PageHeader } from "../components/ui/PageHeader";
 
 type ProfileResponse = {
   user: AuthUser;
@@ -157,6 +158,7 @@ export function SettingsPage() {
 
   function handleSignOut() {
     logout();
+
     navigate("/login", {
       replace: true,
     });
@@ -290,37 +292,37 @@ export function SettingsPage() {
           onSubmit={handlePasswordSubmit}
           className="mt-6 space-y-4"
         >
-          <Input
+          <PasswordInput
             label="Current Password"
-            type="password"
             value={currentPassword}
             onChange={(event) =>
               setCurrentPassword(event.target.value)
             }
             disabled={isChangingPassword}
+            autoComplete="current-password"
             required
           />
 
           <div className="grid gap-4 md:grid-cols-2">
-            <Input
+            <PasswordInput
               label="New Password"
-              type="password"
               value={newPassword}
               onChange={(event) =>
                 setNewPassword(event.target.value)
               }
               disabled={isChangingPassword}
+              autoComplete="new-password"
               required
             />
 
-            <Input
+            <PasswordInput
               label="Confirm New Password"
-              type="password"
               value={confirmPassword}
               onChange={(event) =>
                 setConfirmPassword(event.target.value)
               }
               disabled={isChangingPassword}
+              autoComplete="new-password"
               required
             />
           </div>

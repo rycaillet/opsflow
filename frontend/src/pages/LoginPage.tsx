@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
+import { PasswordInput } from "../components/ui/PasswordInput";
 import { useAuth } from "../hooks/useAuth";
 
 export function LoginPage() {
@@ -14,7 +15,9 @@ export function LoginPage() {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
     setMessage("");
@@ -48,22 +51,26 @@ export function LoginPage() {
         Access your OpsFlow workspace.
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        className="mt-6 space-y-4"
+      >
         <Input
           label="Email"
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           disabled={isSubmitting}
+          autoComplete="email"
           required
         />
 
-        <Input
+        <PasswordInput
           label="Password"
-          type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           disabled={isSubmitting}
+          autoComplete="current-password"
           required
         />
 
