@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card } from "../components/ui/Card";
+import { PriorityBadge } from "../components/ui/PriorityBadge";
+import { StatusBadge } from "../components/ui/StatusBadge";
 import { useAuth } from "../hooks/useAuth";
 import { apiRequest } from "../services/api";
 import type { OpsRequest } from "../types/request";
@@ -17,33 +19,6 @@ function formatDate(date: string) {
     day: "numeric",
     year: "numeric",
   }).format(new Date(date));
-}
-
-function statusClass(status: OpsRequest["status"]) {
-  return {
-    OPEN: "bg-blue-100 text-blue-700",
-    IN_PROGRESS: "bg-purple-100 text-purple-700",
-    WAITING: "bg-yellow-100 text-yellow-700",
-    RESOLVED: "bg-green-100 text-green-700",
-    CLOSED: "bg-slate-100 text-slate-700",
-  }[status];
-}
-
-function priorityClass(priority: OpsRequest["priority"]) {
-  return {
-    LOW: "bg-slate-100 text-slate-700",
-    MEDIUM: "bg-amber-100 text-amber-700",
-    HIGH: "bg-orange-100 text-orange-700",
-    URGENT: "bg-red-100 text-red-700",
-  }[priority];
-}
-
-function formatStatus(status: OpsRequest["status"]) {
-  return status
-    .toLowerCase()
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
 }
 
 export function MyRequestsPage() {
@@ -252,17 +227,15 @@ export function MyRequestsPage() {
 
                     <span className="inline-flex items-center gap-1.5">
                       <Calendar className="h-4 w-4" />
-                      Opened{" "}
-                      {formatDate(request.createdAt)}
+                      Opened {formatDate(request.createdAt)}
                     </span>
 
-                    {!isEmployee &&
-                      request.requester && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <UserRound className="h-4 w-4" />
-                          {request.requester.name}
-                        </span>
-                      )}
+                    {!isEmployee && request.requester && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <UserRound className="h-4 w-4" />
+                        {request.requester.name}
+                      </span>
+                    )}
                   </div>
 
                   {!isEmployee && (
@@ -275,21 +248,8 @@ export function MyRequestsPage() {
                 </div>
 
                 <div className="flex shrink-0 flex-row gap-3 sm:flex-col sm:items-end">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass(
-                      request.status
-                    )}`}
-                  >
-                    {formatStatus(request.status)}
-                  </span>
-
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${priorityClass(
-                      request.priority
-                    )}`}
-                  >
-                    {request.priority}
-                  </span>
+                  <StatusBadge status={request.status} />
+                  <PriorityBadge priority={request.priority} />
                 </div>
               </div>
             </Card>
