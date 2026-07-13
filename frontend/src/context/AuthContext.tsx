@@ -24,6 +24,7 @@ type AuthContextValue = {
   register: (
     credentials: RegisterCredentials
   ) => Promise<AuthUser>;
+  updateUser: (user: AuthUser) => void;
   logout: () => void;
 };
 
@@ -43,9 +44,7 @@ export function AuthProvider({
     localStorage.getItem(TOKEN_STORAGE_KEY)
   );
 
-  const [isLoading, setIsLoading] = useState(
-    Boolean(token)
-  );
+  const [isLoading, setIsLoading] = useState(Boolean(token));
 
   useEffect(() => {
     if (!token) {
@@ -130,6 +129,10 @@ export function AuthProvider({
     return result.user;
   }
 
+  function updateUser(updatedUser: AuthUser) {
+    setUser(updatedUser);
+  }
+
   function logout() {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     setToken(null);
@@ -145,6 +148,7 @@ export function AuthProvider({
         isLoading,
         login,
         register,
+        updateUser,
         logout,
       }}
     >

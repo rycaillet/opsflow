@@ -9,6 +9,7 @@ export type AuthUser = {
   name: string;
   email: string;
   role: UserRole;
+  createdAt?: string;
 };
 
 export type LoginCredentials = {
