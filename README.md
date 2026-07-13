@@ -272,7 +272,7 @@ OpsFlow includes seeded demo accounts for each permission level.
 | Role | Email | Password |
 |------|-------|----------|
 | Employee | `ryan@example.com` | `Password123!` |
-| Staff | `staff@example.com` | `Password456!` |
+| Staff | `staff@example.com` | `Password123!` |
 | Manager | `manager@example.com` | `Password123!` |
 
 These accounts allow reviewers to experience the application from different perspectives without creating additional users.
