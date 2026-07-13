@@ -8,6 +8,8 @@ import {
 import { Link, useParams } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
+import { PriorityBadge } from "../components/ui/PriorityBadge";
+import { StatusBadge } from "../components/ui/StatusBadge";
 import { useAuth } from "../hooks/useAuth";
 import { apiRequest } from "../services/api";
 import type { Comment } from "../types/comment";
@@ -231,7 +233,11 @@ export function RequestDetailPage() {
   }
 
   if (isLoading) {
-    return <p className="text-slate-600">Loading request...</p>;
+    return (
+      <p className="text-slate-600">
+        Loading request...
+      </p>
+    );
   }
 
   if (error && !request) {
@@ -344,8 +350,7 @@ export function RequestDetailPage() {
                     value={request.status}
                     onChange={(event) =>
                       handleStatusChange(
-                        event.target
-                          .value as OpsRequest["status"]
+                        event.target.value as OpsRequest["status"]
                       )
                     }
                     disabled={isUpdating}
@@ -364,20 +369,16 @@ export function RequestDetailPage() {
                   )}
                 </>
               ) : (
-                <p className="font-semibold text-slate-900">
-                  {formatStatus(request.status)}
-                </p>
+                <StatusBadge status={request.status} />
               )}
             </div>
 
-            <div>
+            <div className="space-y-2">
               <p className="text-sm font-medium text-slate-500">
                 Priority
               </p>
 
-              <p className="mt-1 font-semibold text-slate-900">
-                {request.priority}
-              </p>
+              <PriorityBadge priority={request.priority} />
             </div>
           </div>
         </div>

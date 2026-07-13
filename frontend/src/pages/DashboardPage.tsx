@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card } from "../components/ui/Card";
+import { StatusBadge } from "../components/ui/StatusBadge";
 import { useAuth } from "../hooks/useAuth";
 import { apiRequest } from "../services/api";
 import type { OpsRequest } from "../types/request";
@@ -18,24 +19,6 @@ function formatDate(date: string) {
     day: "numeric",
     year: "numeric",
   }).format(new Date(date));
-}
-
-function formatStatus(status: OpsRequest["status"]) {
-  return status
-    .toLowerCase()
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
-function statusClass(status: OpsRequest["status"]) {
-  return {
-    OPEN: "bg-blue-100 text-blue-700",
-    IN_PROGRESS: "bg-purple-100 text-purple-700",
-    WAITING: "bg-yellow-100 text-yellow-700",
-    RESOLVED: "bg-green-100 text-green-700",
-    CLOSED: "bg-slate-100 text-slate-700",
-  }[status];
 }
 
 type MetricCardProps = {
@@ -54,6 +37,7 @@ function MetricCard({
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm text-slate-500">{label}</p>
+
           <p className="mt-2 text-3xl font-bold text-slate-900">
             {value}
           </p>
@@ -291,6 +275,7 @@ export function DashboardPage() {
 
                 <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-slate-500">
                   <span>{request.category}</span>
+
                   <span>
                     Updated {formatDate(request.updatedAt)}
                   </span>
@@ -303,13 +288,9 @@ export function DashboardPage() {
                 </div>
               </div>
 
-              <span
-                className={`w-fit shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${statusClass(
-                  request.status
-                )}`}
-              >
-                {formatStatus(request.status)}
-              </span>
+              <div className="shrink-0">
+                <StatusBadge status={request.status} />
+              </div>
             </Link>
           ))}
 
