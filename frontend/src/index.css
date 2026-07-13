@@ -1,1 +1,32 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+html {
+  background-color: #f8fafc;
+}
+
+html.dark {
+  background-color: #020617;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background-color: #f8fafc;
+  color: #0f172a;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+html.dark body {
+  background-color: #020617;
+  color: #f8fafc;
+}

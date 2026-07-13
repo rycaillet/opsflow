@@ -7,10 +7,12 @@ import {
   Inbox,
   Users,
 } from "lucide-react";
+
 import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
 import { LoadingState } from "../components/ui/LoadingState";
+import { PageHeader } from "../components/ui/PageHeader";
 import { useAuth } from "../hooks/useAuth";
 import { apiRequest } from "../services/api";
 import type {
@@ -34,23 +36,23 @@ function MetricCard({
   icon: Icon,
 }: MetricCardProps) {
   return (
-    <Card>
-      <div className="flex items-start justify-between gap-4">
+    <Card className="h-full">
+      <div className="flex h-full items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-slate-500">
+          <p className="min-h-10 text-sm font-medium text-slate-500 dark:text-slate-400">
             {label}
           </p>
 
-          <p className="mt-2 text-3xl font-bold text-slate-900">
+          <p className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">
             {value}
           </p>
 
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
             {description}
           </p>
         </div>
 
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
           <Icon className="h-5 w-5" />
         </div>
       </div>
@@ -78,17 +80,17 @@ function BreakdownCard({
 }: BreakdownCardProps) {
   const maximumCount = Math.max(
     ...items.map((item) => item.count),
-    1
+    1,
   );
 
   return (
     <Card>
       <div>
-        <h2 className="text-lg font-semibold text-slate-900">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
           {title}
         </h2>
 
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           {description}
         </p>
       </div>
@@ -101,16 +103,16 @@ function BreakdownCard({
           return (
             <div key={item.label}>
               <div className="mb-2 flex items-center justify-between gap-4">
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   {item.label}
                 </p>
 
-                <p className="text-sm font-semibold text-slate-900">
+                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                   {item.count}
                 </p>
               </div>
 
-              <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+              <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                 <div
                   className="h-full rounded-full bg-blue-600 transition-all"
                   style={{
@@ -139,7 +141,7 @@ function formatLabel(value: string) {
     .split("_")
     .map(
       (word) =>
-        word.charAt(0).toUpperCase() + word.slice(1)
+        word.charAt(0).toUpperCase() + word.slice(1),
     )
     .join(" ");
 }
@@ -179,7 +181,7 @@ export function AnalyticsPage() {
           "/analytics/summary",
           {
             token,
-          }
+          },
         );
 
         setSummary(data);
@@ -187,7 +189,7 @@ export function AnalyticsPage() {
         setError(
           error instanceof Error
             ? error.message
-            : "Unable to load analytics."
+            : "Unable to load analytics.",
         );
       } finally {
         setIsLoading(false);
@@ -206,7 +208,7 @@ export function AnalyticsPage() {
       (item: StatusAnalyticsItem) => ({
         label: formatLabel(item.status),
         count: item.count,
-      })
+      }),
     );
   }, [summary]);
 
@@ -219,7 +221,7 @@ export function AnalyticsPage() {
       (item: PriorityAnalyticsItem) => ({
         label: formatLabel(item.priority),
         count: item.count,
-      })
+      }),
     );
   }, [summary]);
 
@@ -232,14 +234,12 @@ export function AnalyticsPage() {
       (item: CategoryAnalyticsItem) => ({
         label: item.category,
         count: item.count,
-      })
+      }),
     );
   }, [summary]);
 
   if (isLoading) {
-    return (
-      <LoadingState message="Loading analytics..." />
-    );
+    return <LoadingState message="Loading analytics..." />;
   }
 
   if (error) {
@@ -262,15 +262,10 @@ export function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">
-          Analytics
-        </h1>
-
-        <p className="mt-2 text-slate-600">
-          Monitor request volume, resolution performance, and team workload.
-        </p>
-      </div>
+      <PageHeader
+        title="Analytics"
+        description="Monitor request volume, resolution performance, and team workload."
+      />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <MetricCard
@@ -304,7 +299,7 @@ export function AnalyticsPage() {
         <MetricCard
           label="Avg. Resolution"
           value={formatResolutionTime(
-            summary.totals.averageResolutionHours
+            summary.totals.averageResolutionHours,
           )}
           description="Average completion time"
           icon={BarChart3}
@@ -336,53 +331,55 @@ export function AnalyticsPage() {
 
       <Card>
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
             <Users className="h-5 w-5" />
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               Active Team Workload
             </h2>
 
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Active requests currently assigned to team members.
             </p>
           </div>
         </div>
 
-        <div className="mt-6 overflow-hidden rounded-xl border border-slate-200">
+        <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
           {summary.workload.length > 0 ? (
             <>
-              <div className="grid grid-cols-[1fr_auto] gap-4 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 sm:grid-cols-[1fr_1fr_auto]">
+              <div className="grid grid-cols-[1fr_auto] gap-4 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-300 sm:grid-cols-[1fr_1fr_auto]">
                 <span>Team member</span>
+
                 <span className="hidden sm:block">
                   Email
                 </span>
+
                 <span>Active requests</span>
               </div>
 
-              <div className="divide-y divide-slate-200">
+              <div className="divide-y divide-slate-200 dark:divide-slate-700">
                 {summary.workload.map((item) => (
                   <div
                     key={item.assigneeId}
                     className="grid grid-cols-[1fr_auto] items-center gap-4 px-4 py-4 sm:grid-cols-[1fr_1fr_auto]"
                   >
                     <div>
-                      <p className="font-medium text-slate-900">
+                      <p className="font-medium text-slate-900 dark:text-slate-100">
                         {item.assigneeName}
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-500 sm:hidden">
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:hidden">
                         {item.assigneeEmail}
                       </p>
                     </div>
 
-                    <p className="hidden truncate text-sm text-slate-500 sm:block">
+                    <p className="hidden truncate text-sm text-slate-500 dark:text-slate-400 sm:block">
                       {item.assigneeEmail}
                     </p>
 
-                    <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700">
+                    <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                       {item.activeRequests}
                     </span>
                   </div>

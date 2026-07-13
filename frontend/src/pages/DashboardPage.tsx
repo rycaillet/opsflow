@@ -7,6 +7,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+
 import { Card } from "../components/ui/Card";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
@@ -34,11 +35,16 @@ function formatStatus(status: OpsRequest["status"]) {
 
 function statusClass(status: OpsRequest["status"]) {
   return {
-    OPEN: "bg-blue-100 text-blue-700",
-    IN_PROGRESS: "bg-purple-100 text-purple-700",
-    WAITING: "bg-yellow-100 text-yellow-700",
-    RESOLVED: "bg-green-100 text-green-700",
-    CLOSED: "bg-slate-100 text-slate-700",
+    OPEN:
+      "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+    IN_PROGRESS:
+      "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300",
+    WAITING:
+      "bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300",
+    RESOLVED:
+      "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300",
+    CLOSED:
+      "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
   }[status];
 }
 
@@ -54,16 +60,19 @@ function MetricCard({
   icon: Icon,
 }: MetricCardProps) {
   return (
-    <Card>
-      <div className="flex items-start justify-between gap-4">
+    <Card className="h-full">
+      <div className="flex h-full items-start justify-between gap-4">
         <div>
-          <p className="text-sm text-slate-500">{label}</p>
-          <p className="mt-2 text-3xl font-bold text-slate-900">
+          <p className="min-h-10 text-sm text-slate-500 dark:text-slate-400">
+            {label}
+          </p>
+
+          <p className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">
             {value}
           </p>
         </div>
 
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
           <Icon className="h-5 w-5" />
         </div>
       </div>
@@ -105,7 +114,7 @@ export function DashboardPage() {
         setError(
           error instanceof Error
             ? error.message
-            : "Unable to load dashboard data."
+            : "Unable to load dashboard data.",
         );
       } finally {
         setIsLoading(false);
@@ -120,23 +129,23 @@ export function DashboardPage() {
       (request) =>
         request.status === "OPEN" ||
         request.status === "IN_PROGRESS" ||
-        request.status === "WAITING"
+        request.status === "WAITING",
     ).length;
 
     const highPriority = requests.filter(
       (request) =>
         request.priority === "HIGH" ||
-        request.priority === "URGENT"
+        request.priority === "URGENT",
     ).length;
 
     const resolvedRequests = requests.filter(
       (request) =>
         request.status === "RESOLVED" ||
-        request.status === "CLOSED"
+        request.status === "CLOSED",
     ).length;
 
     const assignedToMe = requests.filter(
-      (request) => request.assigneeId === user?.id
+      (request) => request.assigneeId === user?.id,
     ).length;
 
     return {
@@ -153,15 +162,13 @@ export function DashboardPage() {
       .sort(
         (firstRequest, secondRequest) =>
           new Date(secondRequest.updatedAt).getTime() -
-          new Date(firstRequest.updatedAt).getTime()
+          new Date(firstRequest.updatedAt).getTime(),
       )
       .slice(0, 5);
   }, [requests]);
 
   if (isLoading) {
-    return (
-      <LoadingState message="Loading dashboard..." />
-    );
+    return <LoadingState message="Loading dashboard..." />;
   }
 
   if (error) {
@@ -251,13 +258,13 @@ export function DashboardPage() {
       <Card>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               {isEmployee
                 ? "Recent Requests"
                 : "Recently Updated Requests"}
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               {isEmployee
                 ? "Your latest submitted requests."
                 : "The most recently updated items in the request queue."}
@@ -266,7 +273,7 @@ export function DashboardPage() {
 
           <Link
             to="/requests"
-            className="text-sm font-medium text-blue-600 hover:text-blue-700"
+            className="text-sm font-medium text-blue-600 transition hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
           >
             {isEmployee
               ? "View all requests"
@@ -274,20 +281,21 @@ export function DashboardPage() {
           </Link>
         </div>
 
-        <div className="mt-5 divide-y divide-slate-200">
+        <div className="mt-5 divide-y divide-slate-200 dark:divide-slate-800">
           {recentRequests.map((request) => (
             <Link
               key={request.id}
               to={`/requests/${request.id}`}
-              className="flex flex-col gap-3 py-4 transition hover:bg-slate-50 sm:flex-row sm:items-center sm:justify-between sm:px-2"
+              className="flex flex-col gap-3 rounded-lg py-4 transition hover:bg-slate-50 sm:flex-row sm:items-center sm:justify-between sm:px-2 dark:hover:bg-slate-800/70"
             >
               <div className="min-w-0">
-                <p className="font-medium text-slate-900">
+                <p className="font-medium text-slate-900 dark:text-slate-100">
                   {request.title}
                 </p>
 
-                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-slate-500">
+                <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
                   <span>{request.category}</span>
+
                   <span>
                     Updated {formatDate(request.updatedAt)}
                   </span>
@@ -302,7 +310,7 @@ export function DashboardPage() {
 
               <span
                 className={`w-fit shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${statusClass(
-                  request.status
+                  request.status,
                 )}`}
               >
                 {formatStatus(request.status)}

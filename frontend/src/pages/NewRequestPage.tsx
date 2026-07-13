@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
+import { PageHeader } from "../components/ui/PageHeader";
 import { apiRequest } from "../services/api";
 import type { OpsRequest } from "../types/request";
-import { PageHeader } from "../components/ui/PageHeader";
 
 export function NewRequestPage() {
   const navigate = useNavigate();
@@ -13,13 +14,16 @@ export function NewRequestPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("IT Support");
-  const [priority, setPriority] = useState<OpsRequest["priority"]>("MEDIUM");
+  const [priority, setPriority] =
+    useState<OpsRequest["priority"]>("MEDIUM");
   const [error, setError] = useState("");
 
-  async function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     try {
+      setError("");
+
       const token = localStorage.getItem("opsflow_token");
 
       if (!token) {
@@ -45,7 +49,7 @@ export function NewRequestPage() {
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="New Request"
         description="Submit a workplace request for IT, facilities, HR, or equipment support."
@@ -61,11 +65,12 @@ export function NewRequestPage() {
           />
 
           <label className="block space-y-2">
-            <span className="text-sm font-medium text-slate-700">
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
               Description
             </span>
+
             <textarea
-              className="min-h-32 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="min-h-32 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-950"
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               required
@@ -73,9 +78,12 @@ export function NewRequestPage() {
           </label>
 
           <label className="block space-y-2">
-            <span className="text-sm font-medium text-slate-700">Category</span>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              Category
+            </span>
+
             <select
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-blue-500 dark:focus:ring-blue-950"
               value={category}
               onChange={(event) => setCategory(event.target.value)}
             >
@@ -88,12 +96,17 @@ export function NewRequestPage() {
           </label>
 
           <label className="block space-y-2">
-            <span className="text-sm font-medium text-slate-700">Priority</span>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              Priority
+            </span>
+
             <select
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-blue-500 dark:focus:ring-blue-950"
               value={priority}
               onChange={(event) =>
-                setPriority(event.target.value as OpsRequest["priority"])
+                setPriority(
+                  event.target.value as OpsRequest["priority"],
+                )
               }
             >
               <option value="LOW">Low</option>
@@ -103,7 +116,11 @@ export function NewRequestPage() {
             </select>
           </label>
 
-          {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+          {error && (
+            <p className="text-sm font-medium text-red-600 dark:text-red-400">
+              {error}
+            </p>
+          )}
 
           <Button type="submit">Create Request</Button>
         </form>

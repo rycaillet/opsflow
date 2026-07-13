@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+
 import { AppShell } from "./components/layout/AppShell";
 import { PublicLayout } from "./components/layout/PublicLayout";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
@@ -34,18 +35,22 @@ function App() {
               <AppShell>
                 <Routes>
                   <Route path="/" element={<DashboardPage />} />
+
                   <Route
                     path="/requests"
                     element={<MyRequestsPage />}
                   />
+
                   <Route
                     path="/requests/new"
                     element={<NewRequestPage />}
                   />
+
                   <Route
                     path="/requests/:id"
                     element={<RequestDetailPage />}
                   />
+
                   <Route
                     path="/analytics"
                     element={
@@ -54,6 +59,7 @@ function App() {
                       </RoleRoute>
                     }
                   />
+
                   <Route
                     path="/settings"
                     element={<SettingsPage />}

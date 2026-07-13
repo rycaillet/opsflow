@@ -6,15 +6,17 @@ import {
   UserRound,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+
 import { Card } from "../components/ui/Card";
+import { EmptyState } from "../components/ui/EmptyState";
+import { ErrorState } from "../components/ui/ErrorState";
+import { LoadingState } from "../components/ui/LoadingState";
+import { PageHeader } from "../components/ui/PageHeader";
 import { PriorityBadge } from "../components/ui/PriorityBadge";
 import { StatusBadge } from "../components/ui/StatusBadge";
 import { useAuth } from "../hooks/useAuth";
 import { apiRequest } from "../services/api";
 import type { OpsRequest } from "../types/request";
-import { EmptyState } from "../components/ui/EmptyState";
-import { ErrorState } from "../components/ui/ErrorState";
-import { LoadingState } from "../components/ui/LoadingState";
 
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -56,7 +58,7 @@ export function MyRequestsPage() {
           endpoint,
           {
             token,
-          }
+          },
         );
 
         setRequests(data);
@@ -64,7 +66,7 @@ export function MyRequestsPage() {
         setError(
           error instanceof Error
             ? error.message
-            : "Unable to load requests."
+            : "Unable to load requests.",
         );
       } finally {
         setIsLoading(false);
@@ -114,9 +116,7 @@ export function MyRequestsPage() {
   ]);
 
   if (isLoading) {
-    return (
-      <LoadingState message="Loading requests..." />
-    );
+    return <LoadingState message="Loading requests..." />;
   }
 
   if (error) {
@@ -130,24 +130,22 @@ export function MyRequestsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">
-          {isEmployee ? "My Requests" : "Request Queue"}
-        </h1>
-
-        <p className="mt-2 text-slate-600">
-          {isEmployee
+      <PageHeader
+        title={isEmployee ? "My Requests" : "Request Queue"}
+        description={
+          isEmployee
             ? "View and track the requests you have submitted."
-            : "Review and manage incoming workplace requests."}
-        </p>
-      </div>
+            : "Review and manage incoming workplace requests."
+        }
+      />
 
       <Card className="space-y-4">
         <div className="relative">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
 
           <input
-            className="w-full rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            type="search"
+            className="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-950"
             placeholder={
               isEmployee
                 ? "Search your requests..."
@@ -162,7 +160,7 @@ export function MyRequestsPage() {
 
         <div className="grid gap-3 md:grid-cols-2">
           <select
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-blue-500 dark:focus:ring-blue-950"
             value={statusFilter}
             onChange={(event) =>
               setStatusFilter(event.target.value)
@@ -179,7 +177,7 @@ export function MyRequestsPage() {
           </select>
 
           <select
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-blue-500 dark:focus:ring-blue-950"
             value={priorityFilter}
             onChange={(event) =>
               setPriorityFilter(event.target.value)
@@ -194,7 +192,7 @@ export function MyRequestsPage() {
         </div>
       </Card>
 
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-slate-500 dark:text-slate-400">
         Showing {filteredRequests.length} of{" "}
         {requests.length} requests
       </p>
@@ -204,22 +202,22 @@ export function MyRequestsPage() {
           <Link
             key={request.id}
             to={`/requests/${request.id}`}
-            className="block"
+            className="block rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-950"
           >
-            <Card className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+            <Card className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg dark:hover:border-slate-700 dark:hover:bg-slate-800/80">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0 space-y-3">
                   <div>
-                    <h2 className="text-lg font-semibold text-slate-900">
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                       {request.title}
                     </h2>
 
-                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                    <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
                       {request.description}
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
                     <span className="inline-flex items-center gap-1.5">
                       <Folder className="h-4 w-4" />
                       {request.category}
@@ -239,7 +237,7 @@ export function MyRequestsPage() {
                   </div>
 
                   {!isEmployee && (
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       {request.assignee
                         ? `Assigned to ${request.assignee.name}`
                         : "Unassigned"}

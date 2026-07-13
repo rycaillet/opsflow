@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { KeyRound, LogOut, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
@@ -24,7 +25,7 @@ function formatRole(role: string) {
     .split("_")
     .map(
       (word) =>
-        word.charAt(0).toUpperCase() + word.slice(1)
+        word.charAt(0).toUpperCase() + word.slice(1),
     )
     .join(" ");
 }
@@ -69,7 +70,7 @@ export function SettingsPage() {
   }, [user?.name]);
 
   async function handleProfileSubmit(
-    event: FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault();
 
@@ -91,7 +92,7 @@ export function SettingsPage() {
           body: JSON.stringify({
             name,
           }),
-        }
+        },
       );
 
       updateUser(result.user);
@@ -101,7 +102,7 @@ export function SettingsPage() {
       setProfileError(
         error instanceof Error
           ? error.message
-          : "Unable to update profile."
+          : "Unable to update profile.",
       );
     } finally {
       setIsSavingProfile(false);
@@ -109,7 +110,7 @@ export function SettingsPage() {
   }
 
   async function handlePasswordSubmit(
-    event: FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault();
 
@@ -138,7 +139,7 @@ export function SettingsPage() {
             currentPassword,
             newPassword,
           }),
-        }
+        },
       );
 
       setPasswordMessage(result.message);
@@ -149,7 +150,7 @@ export function SettingsPage() {
       setPasswordError(
         error instanceof Error
           ? error.message
-          : "Unable to update password."
+          : "Unable to update password.",
       );
     } finally {
       setIsChangingPassword(false);
@@ -169,24 +170,24 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="space-y-5">
       <PageHeader
         title="Settings"
         description="Manage your account information and security."
       />
 
-      <Card>
+      <Card className="p-5">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
             <UserRound className="h-5 w-5" />
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               Account Information
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Update the name displayed throughout your workspace.
             </p>
           </div>
@@ -208,31 +209,31 @@ export function SettingsPage() {
 
           <div className="grid gap-4 md:grid-cols-3">
             <div>
-              <p className="text-sm font-medium text-slate-700">
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Email
               </p>
 
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                 {user.email}
               </p>
             </div>
 
             <div>
-              <p className="text-sm font-medium text-slate-700">
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Role
               </p>
 
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                 {formatRole(user.role)}
               </p>
             </div>
 
             <div>
-              <p className="text-sm font-medium text-slate-700">
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Member Since
               </p>
 
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                 {formatDate(user.createdAt)}
               </p>
             </div>
@@ -241,7 +242,7 @@ export function SettingsPage() {
           {profileError && (
             <p
               role="alert"
-              className="text-sm font-medium text-red-600"
+              className="text-sm font-medium text-red-600 dark:text-red-400"
             >
               {profileError}
             </p>
@@ -250,7 +251,7 @@ export function SettingsPage() {
           {profileMessage && (
             <p
               role="status"
-              className="text-sm font-medium text-green-700"
+              className="text-sm font-medium text-green-700 dark:text-green-400"
             >
               {profileMessage}
             </p>
@@ -271,18 +272,18 @@ export function SettingsPage() {
         </form>
       </Card>
 
-      <Card>
+      <Card className="p-5">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
             <KeyRound className="h-5 w-5" />
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               Change Password
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Use a password that is different from your current one.
             </p>
           </div>
@@ -330,7 +331,7 @@ export function SettingsPage() {
           {passwordError && (
             <p
               role="alert"
-              className="text-sm font-medium text-red-600"
+              className="text-sm font-medium text-red-600 dark:text-red-400"
             >
               {passwordError}
             </p>
@@ -339,7 +340,7 @@ export function SettingsPage() {
           {passwordMessage && (
             <p
               role="status"
-              className="text-sm font-medium text-green-700"
+              className="text-sm font-medium text-green-700 dark:text-green-400"
             >
               {passwordMessage}
             </p>
@@ -361,14 +362,14 @@ export function SettingsPage() {
         </form>
       </Card>
 
-      <Card>
+      <Card className="p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               Sign Out
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               End your current OpsFlow session.
             </p>
           </div>
@@ -376,7 +377,7 @@ export function SettingsPage() {
           <button
             type="button"
             onClick={handleSignOut}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50"
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/70"
           >
             <LogOut className="h-4 w-4" />
             Sign out

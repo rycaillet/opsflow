@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
@@ -16,7 +17,7 @@ export function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(
-    event: FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault();
 
@@ -34,7 +35,7 @@ export function LoginPage() {
       setMessage(
         error instanceof Error
           ? error.message
-          : "Login failed."
+          : "Login failed.",
       );
     } finally {
       setIsSubmitting(false);
@@ -43,11 +44,11 @@ export function LoginPage() {
 
   return (
     <Card className="w-full max-w-md">
-      <h1 className="text-3xl font-bold text-slate-900">
+      <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
         Sign in
       </h1>
 
-      <p className="mt-2 text-slate-600">
+      <p className="mt-2 text-slate-600 dark:text-slate-400">
         Access your OpsFlow workspace.
       </p>
 
@@ -86,7 +87,7 @@ export function LoginPage() {
       {message && (
         <p
           role="alert"
-          className="mt-4 text-sm font-medium text-red-600"
+          className="mt-4 text-sm font-medium text-red-600 dark:text-red-400"
         >
           {message}
         </p>
