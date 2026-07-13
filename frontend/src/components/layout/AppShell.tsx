@@ -218,21 +218,24 @@ export function AppShell({ children }: AppShellProps) {
 
       <div className="md:ml-64">
         <header className="relative border-b border-slate-200 bg-white transition-colors dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center justify-between px-6 py-5 md:px-8">
-            <div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
+          <div className="flex items-center justify-between gap-4 px-6 py-5 max-[410px]:gap-3 max-[410px]:px-4 md:px-8">
+            <div className="min-w-0">
+              <p className="truncate text-sm text-slate-500 max-[410px]:text-xs dark:text-slate-400">
                 BluePeak Technologies
               </p>
 
-              <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">
+              <h2 className="whitespace-nowrap text-2xl font-semibold text-slate-900 max-[410px]:text-xl dark:text-white">
                 Operations Dashboard
               </h2>
             </div>
 
-            <div ref={mobileMenuRef} className="relative md:hidden">
+            <div
+              ref={mobileMenuRef}
+              className="relative shrink-0 md:hidden"
+            >
               <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 max-[410px]:gap-1.5 max-[410px]:px-2.5 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                 onClick={() =>
                   setIsMobileMenuOpen((isOpen) => !isOpen)
                 }
@@ -253,7 +256,7 @@ export function AppShell({ children }: AppShellProps) {
               </button>
 
               {isMobileMenuOpen && (
-                <nav className="absolute right-0 top-full z-20 mt-2 w-72 rounded-xl border border-slate-200 bg-white p-2 shadow-lg dark:border-slate-700 dark:bg-slate-900">
+                <nav className="absolute right-0 top-full z-20 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-slate-200 bg-white p-2 shadow-lg dark:border-slate-700 dark:bg-slate-900">
                   <div className="mb-2 border-b border-slate-200 px-3 py-3 dark:border-slate-700">
                     <p className="text-sm font-semibold text-slate-900 dark:text-white">
                       {user?.name}
@@ -311,7 +314,7 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         </header>
 
-        <main className="p-6 md:p-8">{children}</main>
+        <main className="p-6 max-[410px]:px-5 md:p-8">{children}</main>
       </div>
     </div>
   );
