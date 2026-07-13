@@ -8,6 +8,9 @@ import {
   Users,
 } from "lucide-react";
 import { Card } from "../components/ui/Card";
+import { EmptyState } from "../components/ui/EmptyState";
+import { ErrorState } from "../components/ui/ErrorState";
+import { LoadingState } from "../components/ui/LoadingState";
 import { useAuth } from "../hooks/useAuth";
 import { apiRequest } from "../services/api";
 import type {
@@ -120,9 +123,10 @@ function BreakdownCard({
         })}
 
         {items.length === 0 && (
-          <p className="text-sm text-slate-600">
-            {emptyMessage}
-          </p>
+          <EmptyState
+            title="No data available"
+            message={emptyMessage}
+          />
         )}
       </div>
     </Card>
@@ -234,24 +238,26 @@ export function AnalyticsPage() {
 
   if (isLoading) {
     return (
-      <p className="text-slate-600">
-        Loading analytics...
-      </p>
+      <LoadingState message="Loading analytics..." />
     );
   }
 
   if (error) {
     return (
-      <Card>
-        <p className="text-sm font-medium text-red-600">
-          {error}
-        </p>
-      </Card>
+      <ErrorState
+        title="Unable to load analytics"
+        message={error}
+      />
     );
   }
 
   if (!summary) {
-    return null;
+    return (
+      <EmptyState
+        title="No analytics available"
+        message="Analytics data has not been generated yet."
+      />
+    );
   }
 
   return (
@@ -346,44 +352,51 @@ export function AnalyticsPage() {
         </div>
 
         <div className="mt-6 overflow-hidden rounded-xl border border-slate-200">
-          <div className="grid grid-cols-[1fr_auto] gap-4 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 sm:grid-cols-[1fr_1fr_auto]">
-            <span>Team member</span>
-            <span className="hidden sm:block">Email</span>
-            <span>Active requests</span>
-          </div>
-
-          <div className="divide-y divide-slate-200">
-            {summary.workload.map((item) => (
-              <div
-                key={item.assigneeId}
-                className="grid grid-cols-[1fr_auto] items-center gap-4 px-4 py-4 sm:grid-cols-[1fr_1fr_auto]"
-              >
-                <div>
-                  <p className="font-medium text-slate-900">
-                    {item.assigneeName}
-                  </p>
-
-                  <p className="mt-1 text-xs text-slate-500 sm:hidden">
-                    {item.assigneeEmail}
-                  </p>
-                </div>
-
-                <p className="hidden truncate text-sm text-slate-500 sm:block">
-                  {item.assigneeEmail}
-                </p>
-
-                <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700">
-                  {item.activeRequests}
+          {summary.workload.length > 0 ? (
+            <>
+              <div className="grid grid-cols-[1fr_auto] gap-4 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 sm:grid-cols-[1fr_1fr_auto]">
+                <span>Team member</span>
+                <span className="hidden sm:block">
+                  Email
                 </span>
+                <span>Active requests</span>
               </div>
-            ))}
 
-            {summary.workload.length === 0 && (
-              <p className="px-4 py-6 text-sm text-slate-600">
-                No active requests are currently assigned.
-              </p>
-            )}
-          </div>
+              <div className="divide-y divide-slate-200">
+                {summary.workload.map((item) => (
+                  <div
+                    key={item.assigneeId}
+                    className="grid grid-cols-[1fr_auto] items-center gap-4 px-4 py-4 sm:grid-cols-[1fr_1fr_auto]"
+                  >
+                    <div>
+                      <p className="font-medium text-slate-900">
+                        {item.assigneeName}
+                      </p>
+
+                      <p className="mt-1 text-xs text-slate-500 sm:hidden">
+                        {item.assigneeEmail}
+                      </p>
+                    </div>
+
+                    <p className="hidden truncate text-sm text-slate-500 sm:block">
+                      {item.assigneeEmail}
+                    </p>
+
+                    <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700">
+                      {item.activeRequests}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="p-4">
+              <EmptyState
+                title="No assigned workload"
+                message="No active requests are currently assigned to a team member."
+              />
+            </div>
+          )}
         </div>
       </Card>
     </div>
