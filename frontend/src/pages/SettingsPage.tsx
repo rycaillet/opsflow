@@ -7,6 +7,7 @@ import { Input } from "../components/ui/Input";
 import { useAuth } from "../hooks/useAuth";
 import { apiRequest } from "../services/api";
 import type { AuthUser } from "../types/auth";
+import { PageHeader } from "../components/ui/PageHeader";
 
 type ProfileResponse = {
   user: AuthUser;
@@ -167,15 +168,10 @@ export function SettingsPage() {
 
   return (
     <div className="max-w-4xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">
-          Settings
-        </h1>
-
-        <p className="mt-2 text-slate-600">
-          Manage your account information and security.
-        </p>
-      </div>
+      <PageHeader
+        title="Settings"
+        description="Manage your account information and security."
+      />
 
       <Card>
         <div className="flex items-start gap-3">

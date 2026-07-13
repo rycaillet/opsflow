@@ -5,6 +5,7 @@ import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { apiRequest } from "../services/api";
 import type { OpsRequest } from "../types/request";
+import { PageHeader } from "../components/ui/PageHeader";
 
 export function NewRequestPage() {
   const navigate = useNavigate();
@@ -45,12 +46,10 @@ export function NewRequestPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">New Request</h1>
-        <p className="mt-2 text-slate-600">
-          Submit a workplace request for IT, facilities, HR, or equipment support.
-        </p>
-      </div>
+      <PageHeader
+        title="New Request"
+        description="Submit a workplace request for IT, facilities, HR, or equipment support."
+      />
 
       <Card>
         <form onSubmit={handleSubmit} className="space-y-4">
