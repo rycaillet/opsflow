@@ -14,6 +14,8 @@ import { useAuth } from "../hooks/useAuth";
 import { apiRequest } from "../services/api";
 import type { Comment } from "../types/comment";
 import type { OpsRequest } from "../types/request";
+import { ErrorState } from "../components/ui/ErrorState";
+import { LoadingState } from "../components/ui/LoadingState";
 
 const statuses: OpsRequest["status"][] = [
   "OPEN",
@@ -234,19 +236,16 @@ export function RequestDetailPage() {
 
   if (isLoading) {
     return (
-      <p className="text-slate-600">
-        Loading request...
-      </p>
+      <LoadingState message="Loading request details..." />
     );
   }
 
   if (error && !request) {
     return (
-      <Card>
-        <p className="text-sm font-medium text-red-600">
-          {error}
-        </p>
-      </Card>
+      <ErrorState
+        title="Unable to load request"
+        message={error}
+      />
     );
   }
 
