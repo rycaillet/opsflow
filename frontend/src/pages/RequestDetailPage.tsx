@@ -263,7 +263,7 @@ export function RequestDetailPage() {
   }
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="w-full space-y-6">
       <Link
         to="/requests"
         className="text-sm font-medium text-blue-600 transition hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
@@ -289,7 +289,7 @@ export function RequestDetailPage() {
               {request.title}
             </h1>
 
-            <p className="mt-2 leading-7 text-slate-600 dark:text-slate-300">
+            <p className="mt-2 max-w-5xl leading-7 text-slate-600 dark:text-slate-300">
               {request.description}
             </p>
           </div>
