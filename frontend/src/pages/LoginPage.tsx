@@ -1,4 +1,8 @@
-import { useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Button } from "../components/ui/Button";
@@ -6,6 +10,7 @@ import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { PasswordInput } from "../components/ui/PasswordInput";
 import { useAuth } from "../hooks/useAuth";
+
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -15,6 +20,16 @@ export function LoginPage() {
   const [password, setPassword] = useState("Password123!");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const apiBaseUrl =
+      import.meta.env.VITE_API_BASE_URL ??
+      "http://localhost:5001/api";
+
+    fetch(`${apiBaseUrl}/health`).catch(() => {
+    // The login request will still show an error if the API is unavailable.
+    });
+  }, []);
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -80,8 +95,17 @@ export function LoginPage() {
           className="w-full"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Signing in..." : "Sign in"}
+          {isSubmitting
+          ? "Starting demo workspace..."
+          : "Sign in"}
         </Button>
+
+        {isSubmitting && (
+          <p className="text-center text-xs text-slate-500 dark:text-slate-400">
+          The free demo server may take up to a minute to wake up.
+          </p>
+        )}
+
       </form>
 
       {message && (
